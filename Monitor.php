@@ -3,7 +3,7 @@
  * Monitor.php
  *
  * Simple monitoring script that uses pushover to send a notification on statuschange
- * this file should be executed by a wrapperscript  that continually calls it. or Crontab if 1 time per minute is enough
+ * this file should be executed by the wrapperscript  that continually calls it.
  *
  * @package phpNetmonitor
  */
@@ -195,12 +195,20 @@ class Monitor
     }
 
     /**
-     * @param $host
+     * Exec the ping command itself, simple way to be sure its not blocking.
+     * ping -W 100 -c 2
+     *
+     * -W 100    set wait time to 100 ms (to keep the script fast)
+     * -c 2      ping 2 times, so monitoring wont alert when a single ping has been lost
+     *
+     * using /sbin/ping hard path, so it wont fail path isn't set
+     *
+     * @param string $host
      * @return boolean
      */
     public function ping($host)
     {
-        exec("ping -c 2 " . $host, $output, $result);
+        exec("/sbin/ping -W 100 -c 2 " . $host, $output, $result);
         if (stripos(implode('', $output), '64 bytes') === false) {
             return false;
         } else {
